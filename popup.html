@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastramento SICAD - Lote</title>
+  <style>
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e429f;
+      --success: #057a55;
+      --error: #c81e1e;
+      --warning: #c27803;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 540px;
+      min-height: 300px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+
+    /* HEADER */
+    #header {
+      background: var(--primary);
+      color: white;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    #header h1 { font-size: 14px; font-weight: 600; letter-spacing: .3px; }
+    #header-right { display: flex; align-items: center; gap: 8px; }
+    #statusDot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #6ee7b7;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1 } 50% { opacity:.4 }
+    }
+    #saveStatus { font-size: 11px; opacity:.85; }
+
+    /* MAIN */
+    #main {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* INSTRUÇÃO */
+    .instrucao {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    .instrucao strong { display: block; margin-bottom: 3px; }
+    .instrucao code {
+      background: #dbeafe;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    /* TEXTAREA PRINCIPAL */
+    label { font-weight: 600; font-size: 12px; color: var(--gray-700); display: block; margin-bottom: 4px; }
+
+    #listaRegistros {
+      width: 100%;
+      height: 260px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      background: white;
+      transition: border-color .15s;
+    }
+    #listaRegistros:focus { border-color: var(--primary); }
+
+    /* CONTADOR */
+    #contadorRegistros {
+      font-size: 11px;
+      color: var(--gray-500);
+      text-align: right;
+      margin-top: -4px;
+    }
+    #contadorRegistros.ok { color: var(--success); }
+    #contadorRegistros.erro { color: var(--error); }
+
+    /* OPÇÕES */
+    .opcoes-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .opcao-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--gray-700);
+      cursor: pointer;
+    }
+    .opcao-item input[type=checkbox] { accent-color: var(--primary); cursor: pointer; }
+
+    /* BOTÕES */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      border: none;
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    #btnIniciar {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+    #btnIniciar:hover:not(:disabled) { background: var(--primary-dark); }
+
+    #btnParar {
+      background: var(--error);
+      color: white;
+      display: none;
+    }
+    #btnParar.visible { display: block; }
+
+    #btnNormalizar {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+    #btnNormalizar:hover:not(:disabled) { background: #d1d5db; }
+
+    /* PROGRESSO */
+    #progressoContainer {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+    #progressoContainer.visible { display: flex; }
+
+    #progressoTexto {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--gray-700);
+    }
+    #progressoBar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    #progressoFill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 99px;
+      width: 0%;
+      transition: width .3s;
+    }
+
+    /* CONTADORES */
+    #contadoresRow {
+      display: none;
+      gap: 8px;
+    }
+    #contadoresRow.visible { display: flex; }
+
+    .contador-card {
+      flex: 1;
+      background: white;
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      text-align: center;
+      border: 1px solid var(--gray-200);
+    }
+    .contador-card .num { font-size: 20px; font-weight: 700; line-height: 1.2; }
+    .contador-card .label { font-size: 10px; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; }
+    .contador-card.sucesso .num { color: var(--success); }
+    .contador-card.erro    .num { color: var(--error); }
+    .contador-card.pendente .num { color: var(--warning); }
+
+    /* LOG */
+    #logSection { border-top: 1px solid var(--gray-200); padding-top: 8px; }
+    #logHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 5px;
+    }
+    #logToggle { font-size: 10px; color: var(--gray-500); }
+    #logContent {
+      max-height: 110px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .log-item {
+      font-size: 11px;
+      padding: 3px 6px;
+      border-radius: 3px;
+      display: grid;
+      grid-template-columns: 16px 55px 1fr;
+      gap: 4px;
+      align-items: start;
+    }
+    .log-item.success { background: #ecfdf5; color: #065f46; }
+    .log-item.error   { background: #fef2f2; color: #991b1b; }
+    .log-item.info    { background: #f0f9ff; color: #075985; }
+    .log-item.processing { background: #fffbeb; color: #92400e; }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <h1>⚡ Cadastramento SICAD — Lote</h1>
+  <div id="header-right">
+    <span id="saveStatus"></span>
+    <span id="statusDot"></span>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- INSTRUÇÃO DE USO -->
+  <div class="instrucao">
+    <strong>📋 Formato: um bloco por RG, separados por <code>===</code></strong>
+    Primeira linha do bloco = RG/Registro &nbsp;|&nbsp; Linhas seguintes = texto (até 2000 chars)<br>
+    Exemplo: <code>12345</code> &nbsp;→&nbsp; quebra <code>===</code> &nbsp;→&nbsp; <code>67890</code>
+  </div>
+
+  <!-- ÁREA PRINCIPAL DE ENTRADA -->
+  <div>
+    <label for="listaRegistros">Registros e Textos</label>
+    <textarea id="listaRegistros" placeholder="12345
+Texto completo para o RG 12345.
+Pode ter múltiplas linhas aqui.
+
+===
+
+67890
+Texto diferente para o RG 67890.
+Cada bloco tem seu próprio conteúdo.
+
+===
+
+11111
+Mais um registro com texto exclusivo."></textarea>
+    <div id="contadorRegistros">0 registros detectados</div>
+  </div>
+
+  <!-- OPÇÕES -->
+  <div class="opcoes-row">
+    <label class="opcao-item">
+      <input type="checkbox" id="autoSubmitOption" checked>
+      Auto-submeter
+    </label>
+    <label class="opcao-item">
+      <input type="checkbox" id="waitModalOption" checked>
+      Fechar modais
+    </label>
+    <label class="opcao-item">
+      <input type="checkbox" id="delayBetweenOption" checked>
+      Intervalo entre itens
+    </label>
+  </div>
+
+  <!-- BOTÕES -->
+  <div class="btn-row">
+    <button id="btnNormalizar" title="Normalizar e validar blocos">🔧 Normalizar</button>
+    <button id="btnIniciar" disabled>▶ Iniciar Cadastramento</button>
+    <button id="btnParar">⏹ Parar</button>
+  </div>
+
+  <!-- BARRA DE PROGRESSO -->
+  <div id="progressoContainer">
+    <div id="progressoTexto">
+      <span id="progressoLabel">Aguardando...</span>
+      <span id="progressoNumero">0/0</span>
+    </div>
+    <div id="progressoBar"><div id="progressoFill"></div></div>
+  </div>
+
+  <!-- CONTADORES -->
+  <div id="contadoresRow">
+    <div class="contador-card sucesso">
+      <div class="num" id="countSucesso">0</div>
+      <div class="label">Sucesso</div>
+    </div>
+    <div class="contador-card erro">
+      <div class="num" id="countErro">0</div>
+      <div class="label">Erro</div>
+    </div>
+    <div class="contador-card pendente">
+      <div class="num" id="countPendente">0</div>
+      <div class="label">Pendente</div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div id="logSection">
+    <div id="logHeader">
+      <span>📋 Log de execução</span>
+      <span id="logToggle">▼</span>
+    </div>
+    <div id="logContent"></div>
+  </div>
+
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
