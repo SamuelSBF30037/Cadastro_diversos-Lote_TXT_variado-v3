@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Cadastramento SICAD - Lote",
+  "version": "3.0",
+  "description": "Cadastramento em lote no SICAD com texto individual por RG/registro",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://sisp.ssp.go.gov.br/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Cadastramento SICAD - Lote"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://sisp.ssp.go.gov.br/Sicad-Sicad-context-root/cadastrarItem.jsp*"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
